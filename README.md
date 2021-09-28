@@ -28,4 +28,14 @@ Instalar JsonWebToken:
 npm install jsonwebtoken
 ```
 
+Gerar uma senha secreta aleatória para o JWT:
+```
+node -e "console.log(require('crypto').randomBytes(256).toString('base64'))"
+```
+
+Ler variável de ambiente em aplicações node:
+```
+npm install dotenv
+```
+
 </details>
