@@ -43,6 +43,7 @@ module.exports = {
                     return response.status(401).json();
                 }
 
+                request.token = info.token;
                 request.user = usuario;
                 return next();
             }

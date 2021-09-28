@@ -43,4 +43,9 @@ Instalar Bearer Token:
 npm install passport-http-bearer
 ``` 
 
+Instalar o Redis:
+```
+npm install redis
+`` 
+
 </details>
