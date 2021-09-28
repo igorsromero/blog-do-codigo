@@ -1,6 +1,7 @@
 const usuariosDao = require('./usuarios-dao');
 const { InvalidArgumentError } = require('../erros');
 const validacoes = require('../validacoes-comuns');
+const bcrypt = require("bcrypt");
 
 class Usuario {
   constructor(usuario) {
@@ -28,31 +29,36 @@ class Usuario {
     validacoes.campoTamanhoMaximo(this.senha, 'senha', 64);
   }
 
-  
+
   async deleta() {
     return usuariosDao.deleta(this);
   }
-  
+
   static async buscaPorId(id) {
     const usuario = await usuariosDao.buscaPorId(id);
     if (!usuario) {
       return null;
     }
-    
+
     return new Usuario(usuario);
   }
-  
+
   static async buscaPorEmail(email) {
     const usuario = await usuariosDao.buscaPorEmail(email);
     if (!usuario) {
       return null;
     }
-    
+
     return new Usuario(usuario);
   }
 
   static lista() {
     return usuariosDao.lista();
+  }
+
+  static gerarSenhaHash(senha) {
+    const custoHash = 12;
+    return bcrypt.hash(senha, custoHash);
   }
 }
 
