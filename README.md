@@ -38,4 +38,9 @@ Ler variável de ambiente em aplicações node:
 npm install dotenv
 ```
 
+Instalar Bearer Token:
+```
+npm install passport-http-bearer
+``` 
+
 </details>
