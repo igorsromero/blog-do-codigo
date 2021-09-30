@@ -9,7 +9,6 @@ class Usuario {
     this.nome = usuario.nome;
     this.email = usuario.email;
     this.senhaHash = usuario.senhaHash;
-
     this.valida();
   }
 
@@ -18,7 +17,7 @@ class Usuario {
       throw new InvalidArgumentError('O usuário já existe!');
     }
 
-    return usuariosDao.adiciona(this);
+    await usuariosDao.adiciona(this);
   }
 
   async adicionaSenha(senha) {

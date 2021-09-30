@@ -46,6 +46,11 @@ npm install passport-http-bearer
 Instalar o Redis:
 ```
 npm install redis
-`` 
+```
+
+Instalar o Moment:
+```
+npm install moment
+```
 
 </details>
