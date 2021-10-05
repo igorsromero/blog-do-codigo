@@ -53,4 +53,9 @@ Instalar o Moment:
 npm install moment
 ```
 
+Instalar o Nodemailer:
+```
+npm install nodemailer
+```
+
 </details>
