@@ -7,16 +7,17 @@ const dbGet = promisify(db.get).bind(db)
 const dbAll = promisify(db.all).bind(db)
 
 module.exports = {
-  async adiciona (usuario) {
+  async adiciona(usuario) {
     try {
       await dbRun(
-        `INSERT INTO usuarios (nome, email, senhaHash, emailVerificado) 
-        VALUES (?, ?, ?, ?)`,
+        `INSERT INTO usuarios (nome, email, senhaHash, emailVerificado, cargo) 
+        VALUES (?, ?, ?, ?, ?)`,
         [
           usuario.nome,
           usuario.email,
           usuario.senhaHash,
-          usuario.emailVerificado
+          usuario.emailVerificado,
+          usuario.cargo
         ]
       )
     } catch (erro) {
@@ -24,7 +25,7 @@ module.exports = {
     }
   },
 
-  async buscaPorId (id) {
+  async buscaPorId(id) {
     try {
       return await dbGet('SELECT * FROM usuarios WHERE id = ?', [id])
     } catch (erro) {
@@ -32,7 +33,7 @@ module.exports = {
     }
   },
 
-  async buscaPorEmail (email) {
+  async buscaPorEmail(email) {
     try {
       return await dbGet('SELECT * FROM usuarios WHERE email = ?', [email])
     } catch (erro) {
@@ -40,7 +41,7 @@ module.exports = {
     }
   },
 
-  async lista () {
+  async lista() {
     try {
       return await dbAll('SELECT * FROM usuarios')
     } catch (erro) {
@@ -48,7 +49,7 @@ module.exports = {
     }
   },
 
-  async modificaEmailVerificado (usuario, emailVerificado) {
+  async modificaEmailVerificado(usuario, emailVerificado) {
     try {
       await dbRun('UPDATE usuarios SET emailVerificado = ? WHERE id = ?', [
         emailVerificado,
@@ -59,7 +60,7 @@ module.exports = {
     }
   },
 
-  async deleta (usuario) {
+  async deleta(usuario) {
     try {
       await dbRun('DELETE FROM usuarios WHERE id = ?', [usuario.id])
     } catch (erro) {

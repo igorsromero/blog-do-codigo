@@ -4,20 +4,21 @@ const { InvalidArgumentError } = require('../erros')
 const tokens = require('./tokens')
 const { EmailVerificacao } = require('./emails')
 
-function geraEndereco (rota, token) {
+function geraEndereco(rota, token) {
   const baseURL = process.env.BASE_URL
   return `${baseURL}${rota}${token}`
 }
 
 module.exports = {
-  async adiciona (req, res) {
-    const { nome, email, senha } = req.body
+  async adiciona(req, res) {
+    const { nome, email, senha, cargo } = req.body
 
     try {
       const usuario = new Usuario({
         nome,
         email,
-        emailVerificado: false
+        emailVerificado: false,
+        cargo
       })
       await usuario.adicionaSenha(senha)
       await usuario.adiciona()
@@ -36,7 +37,7 @@ module.exports = {
     }
   },
 
-  async login (req, res) {
+  async login(req, res) {
     try {
       const accessToken = tokens.access.cria(req.user.id)
       const refreshToken = await tokens.refresh.cria(req.user.id)
@@ -47,7 +48,7 @@ module.exports = {
     }
   },
 
-  async logout (req, res) {
+  async logout(req, res) {
     try {
       const token = req.token
       await tokens.access.invalida(token)
@@ -57,7 +58,7 @@ module.exports = {
     }
   },
 
-  async lista (req, res) {
+  async lista(req, res) {
     try {
       const usuarios = await Usuario.lista()
       res.json(usuarios)
@@ -66,7 +67,7 @@ module.exports = {
     }
   },
 
-  async verificaEmail (req, res) {
+  async verificaEmail(req, res) {
     try {
       const usuario = req.user
       await usuario.verificaEmail()
@@ -76,7 +77,7 @@ module.exports = {
     }
   },
 
-  async deleta (req, res) {
+  async deleta(req, res) {
     try {
       const usuario = await Usuario.buscaPorId(req.params.id)
       await usuario.deleta()
