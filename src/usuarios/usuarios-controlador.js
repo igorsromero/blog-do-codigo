@@ -1,60 +1,88 @@
-const Usuario = require('./usuarios-modelo');
-const { InvalidArgumentError, InternalServerError } = require('../erros');
-const jwt = require("jsonwebtoken");
+const Usuario = require('./usuarios-modelo')
+const { InvalidArgumentError } = require('../erros')
 
-function criarTokenJWT(usuario) {
-  const payload = {
-    id: usuario.id
-  };
+const tokens = require('./tokens')
+const { EmailVerificacao } = require('./emails')
 
-  const token = jwt.sign(payload, process.env.CHAVE_JWT, { expiresIn: '15m' });
-  return token;
+function geraEndereco (rota, token) {
+  const baseURL = process.env.BASE_URL
+  return `${baseURL}${rota}${token}`
 }
 
 module.exports = {
-  adiciona: async (req, res) => {
-    const { nome, email, senha } = req.body;
+  async adiciona (req, res) {
+    const { nome, email, senha } = req.body
 
     try {
       const usuario = new Usuario({
         nome,
-        email
-      });
+        email,
+        emailVerificado: false
+      })
+      await usuario.adicionaSenha(senha)
+      await usuario.adiciona()
 
-      await usuario.adicionaSenha(senha);
+      const token = tokens.verificacaoEmail.cria(usuario.id)
+      const endereco = geraEndereco('/usuario/verifica_email/', token)
+      const emailVerificacao = new EmailVerificacao(usuario, endereco)
+      emailVerificacao.enviaEmail().catch(console.log)
 
-      await usuario.adiciona();
-
-      res.status(201).json();
+      res.status(201).json()
     } catch (erro) {
       if (erro instanceof InvalidArgumentError) {
-        res.status(422).json({ erro: erro.message });
-      } else if (erro instanceof InternalServerError) {
-        res.status(500).json({ erro: erro.message });
-      } else {
-        res.status(500).json({ erro: erro.message });
+        return res.status(400).json({ erro: erro.message })
       }
+      res.status(500).json({ erro: erro.message })
     }
   },
 
-  login: (req, res) => {
-    const token = criarTokenJWT(req.user);
-    res.set("Authorization", token);
-    res.status(204).send();
-  },
-
-  lista: async (req, res) => {
-    const usuarios = await Usuario.lista();
-    res.json(usuarios);
-  },
-
-  deleta: async (req, res) => {
-    const usuario = await Usuario.buscaPorId(req.params.id);
+  async login (req, res) {
     try {
-      await usuario.deleta();
-      res.status(200).send();
+      const accessToken = tokens.access.cria(req.user.id)
+      const refreshToken = await tokens.refresh.cria(req.user.id)
+      res.set('Authorization', accessToken)
+      res.status(200).json({ refreshToken })
     } catch (erro) {
-      res.status(500).json({ erro: erro });
+      res.status(500).json({ erro: erro.message })
+    }
+  },
+
+  async logout (req, res) {
+    try {
+      const token = req.token
+      await tokens.access.invalida(token)
+      res.status(204).json()
+    } catch (erro) {
+      res.status(500).json({ erro: erro.message })
+    }
+  },
+
+  async lista (req, res) {
+    try {
+      const usuarios = await Usuario.lista()
+      res.json(usuarios)
+    } catch (erro) {
+      res.status(500).json({ erro: erro.message })
+    }
+  },
+
+  async verificaEmail (req, res) {
+    try {
+      const usuario = req.user
+      await usuario.verificaEmail()
+      res.status(200).json()
+    } catch (erro) {
+      res.status(500).json({ erro: erro.message })
+    }
+  },
+
+  async deleta (req, res) {
+    try {
+      const usuario = await Usuario.buscaPorId(req.params.id)
+      await usuario.deleta()
+      res.status(200).json()
+    } catch (erro) {
+      res.status(500).json({ erro: erro })
     }
   }
-};
+}
